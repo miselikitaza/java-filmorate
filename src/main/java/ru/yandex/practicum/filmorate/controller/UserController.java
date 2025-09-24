@@ -60,6 +60,7 @@ public class UserController {
 
     @GetMapping
     public Collection<User> getAllUsers() {
+        log.info("Получен запрос на получение всех пользователей. Количество: {}", users.size());
         return users.values();
     }
 
