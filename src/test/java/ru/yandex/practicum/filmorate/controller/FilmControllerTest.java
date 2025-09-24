@@ -26,7 +26,7 @@ class FilmControllerTest {
     }
 
     @Test
-    void ShouldCreateFilmWithValidData() {
+    void shouldCreateFilmWithValidData() {
         Film createdFilm = filmController.createFilm(validFilm);
         assertNotNull(createdFilm.getId());
         assertEquals("testName", createdFilm.getName());
