@@ -130,10 +130,10 @@ class UserControllerTest {
         updatedUser.setName("updatedName");
         updatedUser.setEmail("updatedEmail@mail.ru");
 
-        userController.updateUser(updatedUser);
-        assertEquals("updatedLogin", oldUser.getLogin());
-        assertEquals("updatedName", oldUser.getName());
-        assertEquals("updatedEmail@mail.ru", oldUser.getEmail());
+        User userAfterUpdate = userController.updateUser(updatedUser);
+        assertEquals("updatedLogin", userAfterUpdate.getLogin());
+        assertEquals("updatedName", userAfterUpdate.getName());
+        assertEquals("updatedEmail@mail.ru", userAfterUpdate.getEmail());
     }
 
     @Test
