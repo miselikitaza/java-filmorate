@@ -38,17 +38,13 @@ class FilmControllerTest {
     @Test
     void createFilmWithNullNameShouldThrowException() {
         validFilm.setName(null);
-        assertThrows(ConditionsNotMetException.class, () -> {
-            filmController.createFilm(validFilm);
-        });
+        assertThrows(ConditionsNotMetException.class, () -> filmController.createFilm(validFilm));
     }
 
     @Test
     void createFilmWithBlankNameShouldThrowException() {
         validFilm.setName("   ");
-        assertThrows(ConditionsNotMetException.class, () -> {
-            filmController.createFilm(validFilm);
-        });
+        assertThrows(ConditionsNotMetException.class, () -> filmController.createFilm(validFilm));
     }
 
     @Test
@@ -81,17 +77,13 @@ class FilmControllerTest {
     void createFilmWith201LengthDescriptionShouldThrowException() {
         String longDescription = "d".repeat(201);
         validFilm.setDescription(longDescription);
-        assertThrows(ConditionsNotMetException.class, () -> {
-            filmController.createFilm(validFilm);
-        });
+        assertThrows(ConditionsNotMetException.class, () -> filmController.createFilm(validFilm));
     }
 
     @Test
     void createFilmWithReleaseDateBeforeMinShouldThrowException() {
         validFilm.setReleaseDate(LocalDate.of(1895, 12, 27));
-        assertThrows(ConditionsNotMetException.class, () -> {
-            filmController.createFilm(validFilm);
-        });
+        assertThrows(ConditionsNotMetException.class, () -> filmController.createFilm(validFilm));
     }
 
     @Test
@@ -121,17 +113,13 @@ class FilmControllerTest {
     @Test
     void createFilmWithZeroDurationShouldThrowException() {
         validFilm.setDuration(0L);
-        assertThrows(ConditionsNotMetException.class, () -> {
-            filmController.createFilm(validFilm);
-        });
+        assertThrows(ConditionsNotMetException.class, () -> filmController.createFilm(validFilm));
     }
 
     @Test
     void createFilmWithNegativeDurationShouldThrowException() {
         validFilm.setDuration(-1L);
-        assertThrows(ConditionsNotMetException.class, () -> {
-            filmController.createFilm(validFilm);
-        });
+        assertThrows(ConditionsNotMetException.class, () -> filmController.createFilm(validFilm));
     }
 
     @Test
@@ -154,17 +142,13 @@ class FilmControllerTest {
     @Test
     void updateFilmWithNonExistentIdShouldThrowException() {
         validFilm.setId(999L);
-        assertThrows(NotFoundException.class, () -> {
-            filmController.updateFilm(validFilm);
-        });
+        assertThrows(NotFoundException.class, () -> filmController.updateFilm(validFilm));
     }
 
     @Test
     void updateFilmWithNullIdShouldThrowException() {
         validFilm.setId(null);
-        assertThrows(ConditionsNotMetException.class, () -> {
-            filmController.updateFilm(validFilm);
-        });
+        assertThrows(ConditionsNotMetException.class, () -> filmController.updateFilm(validFilm));
     }
 
     @Test

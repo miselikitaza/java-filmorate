@@ -38,49 +38,37 @@ class UserControllerTest {
     @Test
     void createUserWithBlankEmailShouldThrowException() {
         validUser.setEmail("   ");
-        assertThrows(ConditionsNotMetException.class, () -> {
-            userController.createUser(validUser);
-        });
+        assertThrows(ConditionsNotMetException.class, () -> userController.createUser(validUser));
     }
 
     @Test
     void createUserWithNullEmailShouldThrowException() {
         validUser.setEmail(null);
-        assertThrows(ConditionsNotMetException.class, () -> {
-            userController.createUser(validUser);
-        });
+        assertThrows(ConditionsNotMetException.class, () -> userController.createUser(validUser));
     }
 
     @Test
     void createUserWithEmailMissingAtSymbolShouldThrowException() {
         validUser.setEmail("work.email.com");
-        assertThrows(ConditionsNotMetException.class, () -> {
-            userController.createUser(validUser);
-        });
+        assertThrows(ConditionsNotMetException.class, () -> userController.createUser(validUser));
     }
 
     @Test
     void createUserWithNullLoginShouldThrowException() {
         validUser.setLogin(null);
-        assertThrows(ConditionsNotMetException.class, () -> {
-            userController.createUser(validUser);
-        });
+        assertThrows(ConditionsNotMetException.class, () -> userController.createUser(validUser));
     }
 
     @Test
     void createUserWithBlankLoginShouldThrowException() {
         validUser.setLogin("   ");
-        assertThrows(ConditionsNotMetException.class, () -> {
-            userController.createUser(validUser);
-        });
+        assertThrows(ConditionsNotMetException.class, () -> userController.createUser(validUser));
     }
 
     @Test
     void createUserWithLoginContainingSpacesShouldThrowException() {
         validUser.setLogin("логин с пробелами");
-        assertThrows(ConditionsNotMetException.class, () -> {
-            userController.createUser(validUser);
-        });
+        assertThrows(ConditionsNotMetException.class, () -> userController.createUser(validUser));
     }
 
     @Test
@@ -100,9 +88,7 @@ class UserControllerTest {
     @Test
     void createUserWithFutureBirthdayShouldThrowException() {
         validUser.setBirthday(LocalDate.now().plusDays(1));
-        assertThrows(ConditionsNotMetException.class, () -> {
-            userController.createUser(validUser);
-        });
+        assertThrows(ConditionsNotMetException.class, () -> userController.createUser(validUser));
     }
 
     @Test
@@ -139,17 +125,13 @@ class UserControllerTest {
     @Test
     void updateUserWithNonExistentIdShouldThrowException() {
         validUser.setId(999L);
-        assertThrows(NotFoundException.class, () -> {
-            userController.updateUser(validUser);
-        });
+        assertThrows(NotFoundException.class, () -> userController.updateUser(validUser));
     }
 
     @Test
     void updateUserWithNullIdShouldThrowException() {
         validUser.setId(null);
-        assertThrows(ConditionsNotMetException.class, () -> {
-            userController.updateUser(validUser);
-        });
+        assertThrows(ConditionsNotMetException.class, () -> userController.updateUser(validUser));
     }
 
     @Test
