@@ -62,6 +62,7 @@ public class FilmController {
 
     @GetMapping
     public Collection<Film> getAllFilms() {
+        log.info("Получен запрос на получение всех фильмов. Количество: {}", films.size());
         return films.values();
     }
 
