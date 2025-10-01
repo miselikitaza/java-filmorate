@@ -1,23 +1,36 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.yandex.practicum.filmorate.exception.ConditionsNotMetException;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.hamcrest.Matchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+
+@SpringBootTest
+@AutoConfigureMockMvc
 class UserControllerTest {
 
-    private UserController userController;
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
     private User validUser;
 
     @BeforeEach
     void create() {
-        userController = new UserController();
         validUser = new User();
         validUser.setLogin("testLogin");
         validUser.setName("testName");
@@ -26,118 +39,176 @@ class UserControllerTest {
     }
 
     @Test
-    void shouldCreateUserWithValidData() {
-        User createdUser = userController.createUser(validUser);
-        assertNotNull(createdUser.getId());
-        assertEquals("testEmail@mail.ru", createdUser.getEmail());
-        assertEquals("testLogin", createdUser.getLogin());
-        assertEquals("testName", createdUser.getName());
-        assertEquals(LocalDate.of(2000, 3, 12), createdUser.getBirthday());
+    void shouldCreateUserWithValidData() throws Exception {
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(validUser)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", notNullValue()))
+                .andExpect(jsonPath("$.email", is("testEmail@mail.ru")))
+                .andExpect(jsonPath("$.login", is("testLogin")))
+                .andExpect(jsonPath("$.name", is("testName")))
+                .andExpect(jsonPath("$.birthday", is("2000-03-12")));
     }
 
     @Test
-    void createUserWithBlankEmailShouldThrowException() {
-        validUser.setEmail("   ");
-        assertThrows(ConditionsNotMetException.class, () -> userController.createUser(validUser));
-    }
-
-    @Test
-    void createUserWithNullEmailShouldThrowException() {
-        validUser.setEmail(null);
-        assertThrows(ConditionsNotMetException.class, () -> userController.createUser(validUser));
-    }
-
-    @Test
-    void createUserWithEmailMissingAtSymbolShouldThrowException() {
-        validUser.setEmail("work.email.com");
-        assertThrows(ConditionsNotMetException.class, () -> userController.createUser(validUser));
-    }
-
-    @Test
-    void createUserWithNullLoginShouldThrowException() {
-        validUser.setLogin(null);
-        assertThrows(ConditionsNotMetException.class, () -> userController.createUser(validUser));
-    }
-
-    @Test
-    void createUserWithBlankLoginShouldThrowException() {
+    void createUserWithBlankEmailShouldReturnBadRequest() throws Exception {
         validUser.setLogin("   ");
-        assertThrows(ConditionsNotMetException.class, () -> userController.createUser(validUser));
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(validUser)))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
-    void createUserWithLoginContainingSpacesShouldThrowException() {
-        validUser.setLogin("логин с пробелами");
-        assertThrows(ConditionsNotMetException.class, () -> userController.createUser(validUser));
+    void createUserWithNullEmailShouldReturnBadRequest() throws Exception {
+        validUser.setEmail(null);
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(validUser)))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
-    void createUserWithNullNameShouldUseLoginAsName() {
+    void createUserWithEmailMissingAtSymbolShouldReturnBadRequest() throws Exception {
+        validUser.setEmail("work.email.com");
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(validUser)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void createUserWithNullLoginShouldReturnBadRequest() throws Exception {
+        validUser.setLogin(null);
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(validUser)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void createUserWithBlankLoginShouldReturnBadRequest() throws Exception {
+        validUser.setLogin("   ");
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(validUser)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void createUserWithLoginContainingSpacesShouldReturnBadRequest() throws Exception {
+        validUser.setLogin("login with spaces");
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(validUser)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void createUserWithNullNameShouldUseLoginAsName() throws Exception {
         validUser.setName(null);
-        User createdUser = userController.createUser(validUser);
-        assertEquals("testLogin", createdUser.getName());
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(validUser)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name", is("testLogin")));
     }
 
     @Test
-    void createUserWithBlankNameShouldUseLoginAsName() {
+    void createUserWithBlankNameShouldUseLoginAsName() throws Exception {
         validUser.setName("   ");
-        User createdUser = userController.createUser(validUser);
-        assertEquals("testLogin", createdUser.getName());
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(validUser)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name", is("testLogin")));
     }
 
     @Test
-    void createUserWithFutureBirthdayShouldThrowException() {
+    void createUserWithFutureBirthdayShouldReturnBadRequest() throws Exception {
         validUser.setBirthday(LocalDate.now().plusDays(1));
-        assertThrows(ConditionsNotMetException.class, () -> userController.createUser(validUser));
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(validUser)))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
-    void createUserWithTodayBirthdayShouldBeValid() {
+    void createUserWithTodayBirthdayShouldBeValid() throws Exception {
         validUser.setBirthday(LocalDate.now());
-        User createdUser = userController.createUser(validUser);
-        assertNotNull(createdUser);
-        assertEquals(LocalDate.now(), createdUser.getBirthday());
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(validUser)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.birthday", is(LocalDate.now().toString())));
     }
 
     @Test
-    void createUserWithPastBirthdayShouldBeValid() {
+    void createUserWithPastBirthdayShouldBeValid() throws Exception {
         validUser.setBirthday(LocalDate.now().minusYears(30));
-        User createdUser = userController.createUser(validUser);
-        assertNotNull(createdUser);
-        assertNotNull(createdUser.getBirthday());
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(validUser)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.birthday", notNullValue()));
     }
 
     @Test
-    void shouldUpdateUserWithValidData() {
-        User oldUser = userController.createUser(validUser);
+    void shouldUpdateUserWithValidData() throws Exception {
+        String response = mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(validUser)))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        User oldUser = objectMapper.readValue(response, User.class);
+
         User updatedUser = new User();
         updatedUser.setId(oldUser.getId());
         updatedUser.setLogin("updatedLogin");
         updatedUser.setName("updatedName");
         updatedUser.setEmail("updatedEmail@mail.ru");
 
-        User userAfterUpdate = userController.updateUser(updatedUser);
-        assertEquals("updatedLogin", userAfterUpdate.getLogin());
-        assertEquals("updatedName", userAfterUpdate.getName());
-        assertEquals("updatedEmail@mail.ru", userAfterUpdate.getEmail());
+        mockMvc.perform(put("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updatedUser)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(oldUser.getId().intValue())))
+                .andExpect(jsonPath("$.login", is("updatedLogin")))
+                .andExpect(jsonPath("$.name", is("updatedName")))
+                .andExpect(jsonPath("$.email", is("updatedEmail@mail.ru")));
     }
 
     @Test
-    void updateUserWithNonExistentIdShouldThrowException() {
+    void updateUserWithNonExistentIdShouldReturnNotFound() throws Exception {
         validUser.setId(999L);
-        assertThrows(NotFoundException.class, () -> userController.updateUser(validUser));
+        mockMvc.perform(put("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(validUser)))
+                .andExpect(status().isNotFound());
     }
 
     @Test
-    void updateUserWithNullIdShouldThrowException() {
+    void updateUserWithNullIdShouldReturnBadRequest() throws Exception {
         validUser.setId(null);
-        assertThrows(ConditionsNotMetException.class, () -> userController.updateUser(validUser));
+        mockMvc.perform(put("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(validUser)))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
-    void canGetAllUsers() {
-        userController.createUser(validUser);
-        assertEquals(1, userController.getAllUsers().size());
-        assertTrue(userController.getAllUsers().contains(validUser));
+    void canGetAllUsers() throws Exception {
+        mockMvc.perform(delete("/users"))
+                .andExpect(status().isOk());
+        mockMvc.perform(post("/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(validUser)))
+                .andExpect(status().isOk());
+        mockMvc.perform(get("/users"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(greaterThanOrEqualTo(1))))
+                .andExpect(jsonPath("$[?(@.login == 'testLogin')].login", hasItem("testLogin")));
     }
 }
