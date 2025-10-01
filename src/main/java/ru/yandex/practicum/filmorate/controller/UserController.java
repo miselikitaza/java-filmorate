@@ -41,7 +41,9 @@ public class UserController {
             log.warn("Пользователь с ID: {} не найден", newUser.getId());
             throw new NotFoundException("Пользователь с ID: " + newUser.getId() + " не найден");
         }
-        oldUser.setName(newUser.getName());
+        if (newUser.getName() != null) {
+            oldUser.setName(newUser.getName());
+        }
         oldUser.setEmail(newUser.getEmail());
         oldUser.setLogin(newUser.getLogin());
         oldUser.setBirthday(newUser.getBirthday());
