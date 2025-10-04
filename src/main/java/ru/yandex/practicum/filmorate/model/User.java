@@ -23,5 +23,6 @@ public class User {
     private LocalDate birthday;
 
     public interface Create {}
+
     public interface Update {}
 }

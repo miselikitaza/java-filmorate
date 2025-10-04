@@ -27,5 +27,6 @@ public class Film {
     private Long duration;
 
     public interface Create {}
+
     public interface Update {}
 }
