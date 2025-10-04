@@ -1,7 +1,7 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.ConditionsNotMetException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
@@ -17,7 +17,7 @@ public class UserController {
     private final Map<Long, User> users = new HashMap<>();
 
     @PostMapping
-    public User createUser(@Valid @RequestBody User user) {
+    public User createUser(@Validated(User.Create.class) @RequestBody User user) {
         log.info("Получен запрос на создание нового пользователя {}", user.getName());
 
         if (user.getName() == null || user.getName().isBlank()) {
@@ -31,7 +31,7 @@ public class UserController {
     }
 
     @PutMapping
-    public User updateUser(@Valid @RequestBody User newUser) {
+    public User updateUser(@Validated(User.Update.class) @RequestBody User newUser) {
         if (newUser.getId() == null) {
             log.warn("Попытка обновления пользователя без указания ID");
             throw new ConditionsNotMetException("ID не может быть пустым");
@@ -41,12 +41,18 @@ public class UserController {
             log.warn("Пользователь с ID: {} не найден", newUser.getId());
             throw new NotFoundException("Пользователь с ID: " + newUser.getId() + " не найден");
         }
-        if (newUser.getName() != null) {
+        if (newUser.getName() != null && !newUser.getName().isBlank()) {
             oldUser.setName(newUser.getName());
         }
-        oldUser.setEmail(newUser.getEmail());
-        oldUser.setLogin(newUser.getLogin());
-        oldUser.setBirthday(newUser.getBirthday());
+        if (newUser.getEmail() != null) {
+            oldUser.setEmail(newUser.getEmail());
+        }
+        if (newUser.getLogin() != null) {
+            oldUser.setLogin(newUser.getLogin());
+        }
+        if (newUser.getBirthday() != null) {
+            oldUser.setBirthday(newUser.getBirthday());
+        }
         log.info("Пользователь с iD: {} успешно обновлен", oldUser.getId());
         return oldUser;
     }

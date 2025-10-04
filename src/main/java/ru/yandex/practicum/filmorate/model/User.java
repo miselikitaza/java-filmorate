@@ -9,17 +9,19 @@ public class User {
 
     private Long id;
 
-    @NotBlank(message = "Логин не может быть пустым")
-    @Pattern(regexp = "\\S+", message = "Логин не должен содержать пробелы")
+    @NotBlank(message = "Логин не может быть пустым", groups = Create.class)
+    @Pattern(regexp = "\\S+", message = "Логин не должен содержать пробелы", groups = {Create.class, Update.class})
     private String login;
 
     private String name;
 
-    @NotBlank(message = "Электронная почта не может быть пустой")
-    @Email(message = "Почта должна содержать символ @")
+    @NotBlank(message = "Электронная почта не может быть пустой", groups = Create.class)
+    @Email(message = "Почта должна содержать символ @", groups = {Create.class, Update.class})
     private String email;
 
-    @PastOrPresent(message = "Дата рождения не может быть в будущем")
+    @PastOrPresent(message = "Дата рождения не может быть в будущем", groups = {Create.class, Update.class})
     private LocalDate birthday;
 
+    public interface Create {}
+    public interface Update {}
 }

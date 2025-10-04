@@ -1,7 +1,8 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import jakarta.validation.Valid;
+
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.ConditionsNotMetException;
@@ -21,7 +22,7 @@ public class FilmController {
     private final Map<Long, Film> films = new HashMap<>();
 
     @PostMapping
-    public Film createFilm(@Valid @RequestBody Film film) {
+    public Film createFilm(@Validated(Film.Create.class) @RequestBody Film film) {
         log.info("Получен запрос на создание фильма {}", film.getName());
         validateReleaseDate(film);
         film.setId(getNextId());
@@ -31,7 +32,7 @@ public class FilmController {
     }
 
     @PutMapping
-    public Film updateFilm(@Valid @RequestBody Film newFilm) {
+    public Film updateFilm(@Validated(Film.Update.class) @RequestBody Film newFilm) {
         if (newFilm.getId() == null) {
             log.error("Попытка обновления фильма без указания ID");
             throw new ConditionsNotMetException("ID не может быть пустым");
@@ -42,10 +43,18 @@ public class FilmController {
             throw new NotFoundException("Фильм с ID: " + newFilm.getId() + " не найден");
         }
         validateReleaseDate(newFilm);
-        oldFilm.setName(newFilm.getName());
-        oldFilm.setDescription(newFilm.getDescription());
-        oldFilm.setReleaseDate(newFilm.getReleaseDate());
-        oldFilm.setDuration(newFilm.getDuration());
+        if (newFilm.getName() != null) {
+            oldFilm.setName(newFilm.getName());
+        }
+        if (newFilm.getDescription() != null) {
+            oldFilm.setDescription(newFilm.getDescription());
+        }
+        if (newFilm.getReleaseDate() != null) {
+            oldFilm.setReleaseDate(newFilm.getReleaseDate());
+        }
+        if (newFilm.getDuration() != null) {
+            oldFilm.setDuration(newFilm.getDuration());
+        }
         log.info("Фильм с ID: {} успешно обновлен", oldFilm.getId());
         return oldFilm;
     }
@@ -62,7 +71,7 @@ public class FilmController {
     }
 
     private void validateReleaseDate(Film film) {
-        if (film.getReleaseDate().isBefore(MIN_DATE)) {
+        if (film.getReleaseDate()!= null && film.getReleaseDate().isBefore(MIN_DATE)) {
             log.warn("Некорректная дата релиза");
             throw new ConditionsNotMetException("Дата релиза должна быть не раньше 28 декабря 1895 года");
         }
