@@ -9,7 +9,7 @@ import java.util.Set;
 @Data
 public class User {
 
-    @NotNull( message = "ID не может быть пустым", groups = Update.class)
+    @NotNull(message = "ID не может быть пустым", groups = Update.class)
     private Long id;
 
     @NotBlank(message = "Логин не может быть пустым", groups = Create.class)
