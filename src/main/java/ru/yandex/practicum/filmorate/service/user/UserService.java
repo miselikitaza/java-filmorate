@@ -28,7 +28,9 @@ public class UserService {
             log.info("В качестве имени будет установлен логин: {}", user.getLogin());
             user.setName(user.getLogin());
         }
-        return userStorage.createUser(user);
+        User createdUser = userStorage.createUser(user);
+        log.info("Пользователь {} успешно содан", user.getName());
+        return createdUser;
     }
 
     public User updateUser(User newUser) {
@@ -55,7 +57,9 @@ public class UserService {
         if (newUser.getBirthday() != null) {
             oldUser.setBirthday(newUser.getBirthday());
         }
-        return userStorage.updateUser(oldUser);
+        User updatedUser = userStorage.updateUser(oldUser);
+        log.info("Пользователь {} успешно обновлен", newUser.getName());
+        return updatedUser;
     }
 
     public User getUserById(Long id) {

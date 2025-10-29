@@ -1,12 +1,10 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.*;
 
-@Slf4j
 @Component
 public class InMemoryFilmStorage implements FilmStorage {
 
@@ -16,14 +14,12 @@ public class InMemoryFilmStorage implements FilmStorage {
     public Film createFilm(Film film) {
         film.setId(getNextId());
         films.put(film.getId(), film);
-        log.info("Фильм {} успешно создан", film.getName());
         return film;
     }
 
     @Override
     public Film updateFilm(Film film) {
         films.put(film.getId(), film);
-        log.info("Фильм с ID: {} успешно обновлен", film.getId());
         return film;
     }
 
