@@ -44,7 +44,6 @@ public class FilmService {
             throw new NotFoundException("Фильм с ID: " + newFilm.getId() + " не найден");
         }
 
-        validateReleaseDate(newFilm);
         if (newFilm.getName() != null) {
             oldFilm.setName(newFilm.getName());
         }

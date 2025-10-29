@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import jakarta.validation.constraints.*;
+import ru.yandex.practicum.filmorate.validation.MinReleaseDate;
 
 @Data
 public class Film {
@@ -22,6 +23,8 @@ public class Film {
     @Size(max = MAX, message = "Максимальная длина описания — 200 символов", groups = {Create.class, Update.class})
     private String description;
 
+    @MinReleaseDate(message = "Минимальная дата выхода фильма - 28 декабря 1895 года",
+            groups = {Create.class, Update.class})
     private LocalDate releaseDate;
 
     @Positive(message = "Продолжительность фильма должна быть положительным числом",
