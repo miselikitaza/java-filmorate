@@ -107,15 +107,11 @@ class FilmControllerTest {
         filmWithEarlyDate.setReleaseDate(LocalDate.of(1895, 12, 27));
         filmWithEarlyDate.setDuration(120L);
 
-        when(filmService.createFilm(any(Film.class)))
-                .thenThrow(new ConditionsNotMetException("Дата релиза должна быть не раньше 28 декабря 1895 года"));
-
         mockMvc.perform(post("/films")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(filmWithEarlyDate)))
                 .andExpect(status().isBadRequest());
 
-        verify(filmService).createFilm(any(Film.class));
     }
 
     @Test

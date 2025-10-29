@@ -352,17 +352,17 @@ class UserServiceTest {
         friend2.setId(3L);
         friend2.setEmail("friend2@mail.com");
 
-        validUser.getFriendIds().addAll(Arrays.asList(2L, 3L));
-
+        List<User> expectedFriends = Arrays.asList(friend1, friend2);
         when(userStorage.getUserById(1L)).thenReturn(validUser);
-        when(userStorage.getUserById(2L)).thenReturn(friend1);
-        when(userStorage.getUserById(3L)).thenReturn(friend2);
+        when(userStorage.getFriends(1L)).thenReturn(expectedFriends);
 
         List<User> friends = userService.getFriends(1L);
 
         assertEquals(2, friends.size());
         assertTrue(friends.stream().anyMatch(f -> f.getId().equals(2L)));
         assertTrue(friends.stream().anyMatch(f -> f.getId().equals(3L)));
+
+        verify(userStorage).getFriends(1L);
     }
 
     @Test
@@ -383,20 +383,20 @@ class UserServiceTest {
 
     @Test
     void getFriendsWithNonExistentFriendIdShouldFilterOutNull() {
-        validUser.getFriendIds().addAll(Arrays.asList(2L, 999L));
-
         User friend = new User();
         friend.setId(2L);
         friend.setEmail("friend@mail.com");
 
+        List<User> expectedFriends = Arrays.asList(friend);
+
         when(userStorage.getUserById(1L)).thenReturn(validUser);
-        when(userStorage.getUserById(2L)).thenReturn(friend);
-        when(userStorage.getUserById(999L)).thenReturn(null);
+        when(userStorage.getFriends(1L)).thenReturn(expectedFriends);
 
         List<User> friends = userService.getFriends(1L);
 
         assertEquals(1, friends.size());
         assertEquals(2L, friends.get(0).getId());
+        verify(userStorage).getFriends(1L);
     }
 
     @Test
@@ -409,19 +409,16 @@ class UserServiceTest {
         mutualFriend2.setId(4L);
         mutualFriend2.setEmail("mutual2@mail.com");
 
-        validUser.getFriendIds().addAll(Arrays.asList(3L, 4L));
-        friendUser.getFriendIds().addAll(Arrays.asList(3L, 4L, 5L));
-
+        List<User> expectedMutualFriends = Arrays.asList(mutualFriend1, mutualFriend2);
         when(userStorage.getUserById(1L)).thenReturn(validUser);
         when(userStorage.getUserById(2L)).thenReturn(friendUser);
-        when(userStorage.getUserById(3L)).thenReturn(mutualFriend1);
-        when(userStorage.getUserById(4L)).thenReturn(mutualFriend2);
+        when(userStorage.getMutualFriends(1L, 2L)).thenReturn(expectedMutualFriends);
 
         List<User> mutualFriends = userService.getMutualFriends(1L, 2L);
-
         assertEquals(2, mutualFriends.size());
         assertTrue(mutualFriends.stream().anyMatch(f -> f.getId().equals(3L)));
         assertTrue(mutualFriends.stream().anyMatch(f -> f.getId().equals(4L)));
+        verify(userStorage).getMutualFriends(1L, 2L);
     }
 
     @Test
@@ -452,21 +449,18 @@ class UserServiceTest {
 
     @Test
     void getMutualFriendsWithNonExistentMutualFriendShouldFilterOutNull() {
-        validUser.getFriendIds().addAll(Arrays.asList(3L, 999L));
-        friendUser.getFriendIds().addAll(Arrays.asList(3L, 999L));
-
         User mutualFriend = new User();
         mutualFriend.setId(3L);
         mutualFriend.setEmail("mutual@mail.com");
+        List<User> expectedMutualFriends = Arrays.asList(mutualFriend);
 
         when(userStorage.getUserById(1L)).thenReturn(validUser);
         when(userStorage.getUserById(2L)).thenReturn(friendUser);
-        when(userStorage.getUserById(3L)).thenReturn(mutualFriend);
-        when(userStorage.getUserById(999L)).thenReturn(null);
+        when(userStorage.getMutualFriends(1L, 2L)).thenReturn(expectedMutualFriends);
 
         List<User> mutualFriends = userService.getMutualFriends(1L, 2L);
-
         assertEquals(1, mutualFriends.size());
         assertEquals(3L, mutualFriends.get(0).getId());
+        verify(userStorage).getMutualFriends(1L, 2L);
     }
 }

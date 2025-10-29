@@ -13,6 +13,7 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.film.FilmService;
 import ru.yandex.practicum.filmorate.service.user.UserService;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -29,7 +30,7 @@ public class FilmServiceTest {
     private FilmStorage filmStorage;
 
     @Mock
-    private UserService userService;
+    private UserStorage userStorage;
 
     @InjectMocks
     private FilmService filmService;
@@ -65,22 +66,6 @@ public class FilmServiceTest {
         assertEquals(validFilm.getId(), result.getId());
         assertEquals(validFilm.getName(), result.getName());
         verify(filmStorage).createFilm(validFilm);
-    }
-
-    @Test
-    void createFilmWithInvalidReleaseDateShouldThrowException() {
-        Film invalidFilm = new Film();
-        invalidFilm.setName("Old Film");
-        invalidFilm.setReleaseDate(LocalDate.of(1890, 1, 1));
-        invalidFilm.setDuration(100L);
-
-        ConditionsNotMetException exception = assertThrows(
-                ConditionsNotMetException.class,
-                () -> filmService.createFilm(invalidFilm)
-        );
-
-        assertEquals("Дата релиза должна быть не раньше 28 декабря 1895 года", exception.getMessage());
-        verify(filmStorage, never()).createFilm(any(Film.class));
     }
 
     @Test
@@ -202,7 +187,7 @@ public class FilmServiceTest {
     @Test
     void likeWithValidDataShouldAddLike() {
         when(filmStorage.getFilmById(1L)).thenReturn(validFilm);
-        when(userService.getUserById(1L)).thenReturn(validUser);
+        when(userStorage.getUserById(1L)).thenReturn(validUser);
         when(filmStorage.updateFilm(any(Film.class))).thenReturn(validFilm);
 
         filmService.like(1L, 1L);
@@ -216,7 +201,7 @@ public class FilmServiceTest {
         validFilm.setLikes(null);
 
         when(filmStorage.getFilmById(1L)).thenReturn(validFilm);
-        when(userService.getUserById(1L)).thenReturn(validUser);
+        when(userStorage.getUserById(1L)).thenReturn(validUser);
         when(filmStorage.updateFilm(any(Film.class))).thenReturn(validFilm);
 
         filmService.like(1L, 1L);
@@ -231,7 +216,7 @@ public class FilmServiceTest {
         validFilm.getLikes().add(1L);
 
         when(filmStorage.getFilmById(1L)).thenReturn(validFilm);
-        when(userService.getUserById(1L)).thenReturn(validUser);
+        when(userStorage.getUserById(1L)).thenReturn(validUser);
 
         ConditionsNotMetException exception = assertThrows(
                 ConditionsNotMetException.class,
@@ -247,7 +232,7 @@ public class FilmServiceTest {
         validFilm.getLikes().add(1L);
 
         when(filmStorage.getFilmById(1L)).thenReturn(validFilm);
-        when(userService.getUserById(1L)).thenReturn(validUser);
+        when(userStorage.getUserById(1L)).thenReturn(validUser);
         when(filmStorage.updateFilm(any(Film.class))).thenReturn(validFilm);
 
         filmService.deleteLike(1L, 1L);
@@ -259,7 +244,7 @@ public class FilmServiceTest {
     @Test
     void deleteLikeWithNonExistentLikeShouldThrowException() {
         when(filmStorage.getFilmById(1L)).thenReturn(validFilm);
-        when(userService.getUserById(1L)).thenReturn(validUser);
+        when(userStorage.getUserById(1L)).thenReturn(validUser);
 
         NotFoundException exception = assertThrows(
                 NotFoundException.class,
@@ -275,7 +260,7 @@ public class FilmServiceTest {
         validFilm.setLikes(null);
 
         when(filmStorage.getFilmById(1L)).thenReturn(validFilm);
-        when(userService.getUserById(1L)).thenReturn(validUser);
+        when(userStorage.getUserById(1L)).thenReturn(validUser);
 
         NotFoundException exception = assertThrows(
                 NotFoundException.class,
@@ -303,22 +288,20 @@ public class FilmServiceTest {
         film3.setName("Film 3");
         film3.setLikes(new HashSet<>());
 
-        List<Film> films = Arrays.asList(film3, film1, film2);
-        when(filmStorage.getAllFilms()).thenReturn(films);
+        List<Film> expectedFilms = Arrays.asList(film1, film2);
+        when(filmStorage.getPopularFilms(2)).thenReturn(expectedFilms);
 
         List<Film> result = filmService.getPopularFilms(2);
-
         assertEquals(2, result.size());
         assertEquals(1L, result.get(0).getId());
         assertEquals(2L, result.get(1).getId());
+        verify(filmStorage).getPopularFilms(2);
     }
 
     @Test
     void getPopularFilmsWithEmptyStorageShouldReturnEmptyList() {
-        when(filmStorage.getAllFilms()).thenReturn(Collections.emptyList());
-
+        when(filmStorage.getPopularFilms(10)).thenReturn(Collections.emptyList());
         List<Film> result = filmService.getPopularFilms(10);
-
         assertTrue(result.isEmpty());
     }
 
@@ -334,14 +317,14 @@ public class FilmServiceTest {
         film2.setName("Film 2");
         film2.setLikes(new HashSet<>(Arrays.asList(1L)));
 
-        List<Film> films = Arrays.asList(film1, film2);
-        when(filmStorage.getAllFilms()).thenReturn(films);
+        List<Film> expectedFilms = Arrays.asList(film2, film1);
+        when(filmStorage.getPopularFilms(2)).thenReturn(expectedFilms);
 
         List<Film> result = filmService.getPopularFilms(2);
-
         assertEquals(2, result.size());
         assertEquals(2L, result.get(0).getId());
         assertEquals(1L, result.get(1).getId());
+        verify(filmStorage).getPopularFilms(2);
     }
 
     @Test
@@ -356,20 +339,18 @@ public class FilmServiceTest {
         film2.setName("Film 2");
         film2.setLikes(new HashSet<>());
 
-        List<Film> films = Arrays.asList(film1, film2);
-        when(filmStorage.getAllFilms()).thenReturn(films);
+        List<Film> expectedFilms = Arrays.asList(film1, film2);
+        when(filmStorage.getPopularFilms(10)).thenReturn(expectedFilms);
 
         List<Film> result = filmService.getPopularFilms(10);
-
         assertEquals(2, result.size());
+        verify(filmStorage).getPopularFilms(10);
     }
 
     @Test
     void getPopularFilmsWithNullFilmListShouldReturnEmptyList() {
-        when(filmStorage.getAllFilms()).thenReturn(null);
-
+        when(filmStorage.getPopularFilms(10)).thenReturn(Collections.emptyList());
         List<Film> result = filmService.getPopularFilms(10);
-
         assertTrue(result.isEmpty());
     }
 
@@ -390,14 +371,14 @@ public class FilmServiceTest {
         film3.setName("Film 2");
         film3.setLikes(new HashSet<>(Arrays.asList(3L)));
 
-        List<Film> films = Arrays.asList(film1, film2, film3);
-        when(filmStorage.getAllFilms()).thenReturn(films);
+        List<Film> expectedFilms = Arrays.asList(film2, film3, film1); // Уже отсортированные
+        when(filmStorage.getPopularFilms(3)).thenReturn(expectedFilms);
 
         List<Film> result = filmService.getPopularFilms(3);
-
         assertEquals(3, result.size());
         assertEquals(1L, result.get(0).getId());
         assertEquals(2L, result.get(1).getId());
         assertEquals(3L, result.get(2).getId());
+        verify(filmStorage).getPopularFilms(3);
     }
 }
