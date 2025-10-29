@@ -8,8 +8,7 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.user.UserService;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
-
-import java.time.LocalDate;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -18,19 +17,19 @@ import java.util.stream.Collectors;
 public class FilmService {
 
     private final FilmStorage filmStorage;
-    private final UserService userService;
-    private static final LocalDate MIN_DATE = LocalDate.of(1895, 12, 28);
+    private final UserStorage userStorage;
 
     @Autowired
-    public FilmService(FilmStorage filmStorage, UserService userService) {
+    public FilmService(FilmStorage filmStorage, UserStorage userStorage) {
         this.filmStorage = filmStorage;
-        this.userService = userService;
+        this.userStorage = userStorage;
     }
 
     public Film createFilm(Film film) {
         log.info("Получен запрос на создание фильма {}", film.getName());
-        validateReleaseDate(film);
-        return filmStorage.createFilm(film);
+        Film createdFilm = filmStorage.createFilm(film);
+        log.info("Фильм {} успешно создан", film.getName());
+        return createdFilm;
     }
 
     public Film updateFilm(Film newFilm) {
@@ -58,7 +57,9 @@ public class FilmService {
         if (newFilm.getDuration() != null) {
             oldFilm.setDuration(newFilm.getDuration());
         }
-        return filmStorage.updateFilm(oldFilm);
+        Film updatedFilm = filmStorage.updateFilm(oldFilm);
+        log.info("Фильм с ID: {} успешно обновлен", newFilm.getId());
+        return updatedFilm;
     }
 
     public Film getFilmById(Long id) {
@@ -84,7 +85,10 @@ public class FilmService {
 
     public void like(Long filmId, Long userId) {
         Film film = getFilmOrThrown(filmId);
-        userService.getUserById(userId);
+        User user = userStorage.getUserById(userId);
+        if (user == null) {
+            throw new NotFoundException("Фильм с ID: " + userId + " не найден");
+        }
 
         if (film.getLikes() == null) {
             film.setLikes(new HashSet<>());
@@ -104,7 +108,7 @@ public class FilmService {
 
     public void deleteLike(Long filmId, Long userId) {
         Film film = getFilmOrThrown(filmId);
-        userService.getUserById(userId);
+        userStorage.getUserById(userId);
 
         if (film.getLikes() == null || !film.getLikes().contains(userId)) {
             log.warn("Пользователь с ID: {} не лайкал фильм с ID: {}", userId, filmId);
