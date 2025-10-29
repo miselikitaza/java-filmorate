@@ -16,8 +16,13 @@ public class InMemoryUserStorage implements UserStorage {
     @Generated
     private final Map<Long, User> users = new HashMap<>();
 
+    private final Set<String> userEmails = new HashSet<>();
+
     @Override
     public User createUser(User user) {
+        if (isEmailExists(user.getEmail())) {
+            return null;
+        }
         user.setId(getNextId());
         users.put(user.getId(), user);
         userEmails.add(user.getEmail());
@@ -26,6 +31,11 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User updateUser(User user) {
+        User existingUser = users.get(user.getId());
+        if (!existingUser.getEmail().equals(user.getEmail())) {
+            userEmails.remove(existingUser.getEmail());
+            userEmails.add(user.getEmail());
+        }
         users.put(user.getId(), user);
         return user;
     }
@@ -42,6 +52,8 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public void deleteUserById(Long id) {
+        User user = users.get(id);
+        userEmails.remove(user.getEmail());
         users.remove(id);
     }
 

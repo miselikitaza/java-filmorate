@@ -45,6 +45,13 @@ public class UserService {
             throw new NotFoundException("Пользователь с ID: " + newUser.getId() + " не найден");
         }
 
+        if (newUser.getEmail() != null && !newUser.getEmail().equals(oldUser.getEmail())) {
+            if (userStorage.isEmailExists(newUser.getEmail())) {
+                log.warn("Пользователь с email {} уже существует", newUser.getEmail());
+                throw new ConditionsNotMetException("Пользователь с email " + newUser.getEmail() + " уже существует");
+            }
+        }
+
         if (newUser.getName() != null && !newUser.getName().isBlank()) {
             oldUser.setName(newUser.getName());
         }
