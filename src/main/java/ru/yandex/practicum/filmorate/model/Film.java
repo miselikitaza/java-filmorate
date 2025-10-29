@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -27,6 +28,7 @@ public class Film {
             groups = {Create.class, Update.class})
     private Long duration;
 
+    @JsonIgnore
     private Set<Long> likes = new HashSet<>();
 
     public interface Create {}
