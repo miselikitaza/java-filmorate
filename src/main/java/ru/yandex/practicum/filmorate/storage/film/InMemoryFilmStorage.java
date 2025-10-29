@@ -2,8 +2,8 @@ package ru.yandex.practicum.filmorate.storage.film;
 
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
-
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class InMemoryFilmStorage implements FilmStorage {
@@ -41,6 +41,20 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public void deleteAllFilms() {
         films.clear();
+    }
+
+    @Override
+    public List<Film> getPopularFilms(int count) {
+        return films.values()
+                .stream()
+                .filter(Objects::nonNull)
+                .sorted(Comparator
+                        .comparing((Film f) -> Optional.ofNullable(f.getLikes()).map(Set::size).orElse(0))
+                        .reversed()
+                        .thenComparing(Film::getId)
+                )
+                .limit(count)
+                .collect(Collectors.toList());
     }
 
     private long getNextId() {

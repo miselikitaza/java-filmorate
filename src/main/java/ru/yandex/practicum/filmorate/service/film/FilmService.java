@@ -10,7 +10,6 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -121,25 +120,10 @@ public class FilmService {
 
     public List<Film> getPopularFilms(int count) {
         log.info("Получение топ-{} популярных фильмов", count);
-
-        return Optional.ofNullable(filmStorage.getAllFilms())
-                .orElse(Collections.emptyList())
-                .stream()
-                .filter(Objects::nonNull)
-                .sorted(Comparator
-                        .comparing((Film f) -> Optional.ofNullable(f.getLikes()).map(Set::size).orElse(0))
-                        .reversed()
-                        .thenComparing(Film::getId)
-                )
-                .limit(count)
-                .collect(Collectors.toList());
-    }
-
-    private void validateReleaseDate(Film film) {
-        if (film.getReleaseDate() != null && film.getReleaseDate().isBefore(MIN_DATE)) {
-            log.warn("Некорректная дата релиза");
-            throw new ConditionsNotMetException("Дата релиза должна быть не раньше 28 декабря 1895 года");
+        if (count <= 0) {
+            throw new ConditionsNotMetException("Количество фильмов должно быть положительным числом");
         }
+        return filmStorage.getPopularFilms(count);
     }
 
     private Film getFilmOrThrown(Long filmId) {

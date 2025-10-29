@@ -17,4 +17,6 @@ public interface FilmStorage {
     public void deleteFilmById(Long id);
 
     public void deleteAllFilms();
+
+    public List<Film> getPopularFilms(int count);
 }

@@ -7,9 +7,7 @@ import ru.yandex.practicum.filmorate.exception.ConditionsNotMetException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
-
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -143,36 +141,18 @@ public class UserService {
 
     public List<User> getFriends(Long id) {
         log.info("Получение друзей пользователя с ID: {}", id);
-        User user = getUserById(id);
-
-        if (user.getFriendIds() == null) {
-            return Collections.emptyList();
-        }
-        return user.getFriendIds().stream()
-                .map(userStorage::getUserById)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+        validateUser(id);
+        List<User> friends = userStorage.getFriends(id);
+        log.info("Найдено {} друзей", friends.size());
+        return friends;
     }
 
     public List<User> getMutualFriends(Long userId, Long friendId) {
         log.debug("Поиск общих друзей между пользователями с ID {} и {}", userId, friendId);
-
-        User user = validateUser(userId);
-        User friend = validateUser(friendId);
-
-        Set<Long> friends1 = user.getFriendIds() != null ? user.getFriendIds() : Collections.emptySet();
-        Set<Long> friends2 = friend.getFriendIds() != null ? friend.getFriendIds() : Collections.emptySet();
-
-        Set<Long> mutualFriendIds = new HashSet<>(friends1);
-        mutualFriendIds.retainAll(friends2);
-
-        log.debug("Найдено {} общих друзей", mutualFriendIds.size());
-        List<User> mutualFriends = mutualFriendIds.stream()
-                .map(userStorage::getUserById)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
-
-        log.debug("Успешно получено {} объектов общих друзей", mutualFriends.size());
+        validateUser(userId);
+        validateUser(friendId);
+        List<User> mutualFriends = userStorage.getMutualFriends(userId, friendId);
+        log.debug("Найдено {} общих друзей", mutualFriends.size());
         return mutualFriends;
     }
 

@@ -5,10 +5,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class InMemoryUserStorage implements UserStorage {
@@ -60,6 +58,40 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public void deleteAllUsers() {
         users.clear();
+    }
+
+    public List<User> getFriends(Long id) {
+        User user = getUserById(id);
+        if (user.getFriendIds() == null) {
+            return Collections.emptyList();
+        }
+        return user.getFriendIds().stream()
+                .map(users::get)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    }
+
+    public List<User> getMutualFriends(Long userId, Long friendId) {
+        User user = users.get(userId);
+        User friend = users.get(friendId);
+        if (user == null || friend == null) {
+            return Collections.emptyList();
+        }
+
+        Set<Long> friends1 = user.getFriendIds() != null ? user.getFriendIds() : Collections.emptySet();
+        Set<Long> friends2 = friend.getFriendIds() != null ? friend.getFriendIds() : Collections.emptySet();
+        Set<Long> mutualFriendIds = new HashSet<>(friends1);
+        mutualFriendIds.retainAll(friends2);
+
+        return mutualFriendIds.stream()
+                .map(users::get)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean isEmailExists(String email) {
+        return userEmails.contains(email);
     }
 
     private long getNextId() {

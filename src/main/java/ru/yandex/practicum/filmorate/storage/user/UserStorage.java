@@ -17,4 +17,10 @@ public interface UserStorage {
     public void deleteUserById(Long id);
 
     public void deleteAllUsers();
+
+    public List<User> getFriends(Long id);
+
+    public List<User> getMutualFriends(Long userId, Long friendId);
+
+    public boolean isEmailExists(String email);
 }
